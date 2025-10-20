@@ -4,6 +4,10 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { zalgoify } from "./zalgoify.js";
 
@@ -16,6 +20,8 @@ const server = new Server(
   {
     capabilities: {
       tools: {},
+      prompts: {},
+      resources: {},
     },
   }
 );
@@ -61,6 +67,135 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
     ],
   };
+});
+
+// List available resources
+server.setRequestHandler(ListResourcesRequestSchema, async () => {
+  return {
+    resources: [
+      {
+        uri: "zalgo://examples/light",
+        name: "Light Intensity Example",
+        description: "Example text showing light intensity zalgo effect",
+        mimeType: "text/plain",
+      },
+      {
+        uri: "zalgo://examples/medium",
+        name: "Medium Intensity Example",
+        description: "Example text showing medium intensity zalgo effect",
+        mimeType: "text/plain",
+      },
+      {
+        uri: "zalgo://examples/heavy",
+        name: "Heavy Intensity Example",
+        description: "Example text showing heavy intensity zalgo effect",
+        mimeType: "text/plain",
+      },
+    ],
+  };
+});
+
+// Read resource content
+server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+  const uri = request.params.uri;
+  
+  const exampleText = "The quick brown fox jumps over the lazy dog. ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789";
+  
+  if (uri === "zalgo://examples/light") {
+    const zalgoText = zalgoify(exampleText, { intensity: "light" });
+    return {
+      contents: [
+        {
+          uri,
+          mimeType: "text/plain",
+          text: `Light Intensity Example:\n\n${zalgoText}\n\nThis uses subtle zalgo effects with minimal combining marks (1-2 per character).`,
+        },
+      ],
+    };
+  }
+  
+  if (uri === "zalgo://examples/medium") {
+    const zalgoText = zalgoify(exampleText, { intensity: "medium" });
+    return {
+      contents: [
+        {
+          uri,
+          mimeType: "text/plain",
+          text: `Medium Intensity Example:\n\n${zalgoText}\n\nThis uses balanced zalgo effects with moderate combining marks (2-4 per character).`,
+        },
+      ],
+    };
+  }
+  
+  if (uri === "zalgo://examples/heavy") {
+    const zalgoText = zalgoify(exampleText, { intensity: "heavy" });
+    return {
+      contents: [
+        {
+          uri,
+          mimeType: "text/plain",
+          text: `Heavy Intensity Example:\n\n${zalgoText}\n\nThis uses intense zalgo effects with maximum combining marks (4-8 per character).`,
+        },
+      ],
+    };
+  }
+  
+  throw new Error(`Unknown resource: ${uri}`);
+});
+
+// List available prompts
+server.setRequestHandler(ListPromptsRequestSchema, async () => {
+  return {
+    prompts: [
+      {
+        name: "zalgoify-text",
+        description: "Convert any text to zalgo format with medium intensity",
+        arguments: [
+          {
+            name: "text",
+            description: "The text to convert to zalgo format",
+            required: true,
+          },
+        ],
+      },
+    ],
+  };
+});
+
+// Handle prompt requests
+server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+  const { name, arguments: args } = request.params;
+
+  if (name === "zalgoify-text") {
+    const text = args?.text;
+    
+    if (!text) {
+      throw new Error("Text argument is required");
+    }
+
+    const zalgoText = zalgoify(text, { intensity: "medium" });
+
+    return {
+      messages: [
+        {
+          role: "user",
+          content: {
+            type: "text",
+            text: `Convert this text to zalgo format: ${text}`,
+          },
+        },
+        {
+          role: "assistant",
+          content: {
+            type: "text",
+            text: zalgoText,
+          },
+        },
+      ],
+    };
+  }
+
+  throw new Error(`Unknown prompt: ${name}`);
 });
 
 // Handle tool calls

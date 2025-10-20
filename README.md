@@ -16,6 +16,28 @@ npm install
 
 This is an MCP server that communicates via stdio. It can be used with any MCP client.
 
+### Available Resources
+
+The server provides example resources showing different intensity levels:
+
+- `zalgo://examples/light` - Subtle zalgo effect with minimal marks
+- `zalgo://examples/medium` - Balanced zalgo effect with moderate marks  
+- `zalgo://examples/heavy` - Intense zalgo effect with maximum marks
+
+Each resource contains the same example text rendered at different intensities, making it easy to preview the effects before applying them to your own text.
+
+### Available Prompts
+
+#### `zalgoify-text`
+
+A quick prompt to convert any text to zalgo format with medium intensity.
+
+**Arguments:**
+- `text` (required): The text to convert to zalgo format
+
+**Example Usage:**
+Simply use the prompt and provide the text you want to convert. The AI will automatically apply medium intensity zalgo effects.
+
 ### Available Tools
 
 #### `zalgoify`
