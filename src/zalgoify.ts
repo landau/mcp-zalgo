@@ -23,16 +23,31 @@ const ZALGO_DOWN = [
 ];
 
 /**
- * Convert text to zalgo format by adding combining diacritical marks
- * @param {string} text - The text to convert
- * @param {Object} options - Configuration options
- * @param {string} options.intensity - 'light', 'medium', or 'heavy'
- * @param {boolean} options.up - Add marks above characters
- * @param {boolean} options.middle - Add marks through characters
- * @param {boolean} options.down - Add marks below characters
- * @returns {string} The zalgoified text
+ * Intensity levels for zalgo effects
  */
-export function zalgoify(text, options = {}) {
+export type ZalgoIntensity = 'light' | 'medium' | 'heavy';
+
+/**
+ * Options for customizing the zalgo effect
+ */
+export interface ZalgoOptions {
+  /** Intensity of the zalgo effect */
+  intensity?: ZalgoIntensity;
+  /** Add marks above characters */
+  up?: boolean;
+  /** Add marks through characters */
+  middle?: boolean;
+  /** Add marks below characters */
+  down?: boolean;
+}
+
+/**
+ * Convert text to zalgo format by adding combining diacritical marks
+ * @param text - The text to convert
+ * @param options - Configuration options
+ * @returns The zalgoified text
+ */
+export function zalgoify(text: string, options: ZalgoOptions = {}): string {
   const {
     intensity = 'medium',
     up = true,
@@ -41,7 +56,7 @@ export function zalgoify(text, options = {}) {
   } = options;
 
   // Determine how many marks to add based on intensity
-  let maxMarks;
+  let maxMarks: number;
   switch (intensity) {
     case 'light':
       maxMarks = 2;
@@ -57,7 +72,7 @@ export function zalgoify(text, options = {}) {
 
   let result = '';
   
-  for (let char of text) {
+  for (const char of text) {
     result += char;
     
     // Don't add marks to spaces

@@ -9,7 +9,13 @@ import {
   ListResourcesRequestSchema,
   ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { zalgoify } from "./zalgoify.js";
+import { zalgoify, ZalgoIntensity } from "./zalgoify.js";
+import { readFile } from "fs/promises";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Create server instance
 const server = new Server(
@@ -91,6 +97,12 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
         description: "Example text showing heavy intensity zalgo effect",
         mimeType: "text/plain",
       },
+      {
+        uri: "zalgo://code/wrapper",
+        name: "Code Execution Wrapper",
+        description: "TypeScript wrapper code for using this MCP server in code execution mode",
+        mimeType: "text/plain",
+      },
     ],
   };
 });
@@ -139,6 +151,22 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
       ],
     };
   }
+
+  if (uri === "zalgo://code/wrapper") {
+    // Read the wrapper template from the actual TypeScript file
+    const templatePath = join(__dirname, "wrapper-template.ts");
+    const wrapperCode = await readFile(templatePath, "utf-8");
+    
+    return {
+      contents: [
+        {
+          uri,
+          mimeType: "text/plain",
+          text: wrapperCode,
+        },
+      ],
+    };
+  }
   
   throw new Error(`Unknown resource: ${uri}`);
 });
@@ -167,7 +195,7 @@ server.setRequestHandler(GetPromptRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   if (name === "zalgoify-text") {
-    const text = args?.text;
+    const text = args?.text as string | undefined;
     
     if (!text) {
       throw new Error("Text argument is required");
@@ -203,7 +231,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   if (name === "zalgoify") {
-    const { text, intensity = "medium", up = true, middle = true, down = true } = args;
+    if (!args) {
+      throw new Error("Arguments are required");
+    }
+
+    const text = args.text as string | undefined;
+    const intensity = (args.intensity as ZalgoIntensity | undefined) ?? "medium";
+    const up = (args.up as boolean | undefined) ?? true;
+    const middle = (args.middle as boolean | undefined) ?? true;
+    const down = (args.down as boolean | undefined) ?? true;
 
     if (!text) {
       throw new Error("Text parameter is required");
