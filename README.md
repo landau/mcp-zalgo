@@ -1,10 +1,23 @@
 # MCP Zalgo Server
 
-A Model Context Protocol (MCP) server that converts text to zalgo format by adding combining diacritical marks.
+> **Code Execution Only** - This MCP server demonstrates the [code execution pattern](https://www.anthropic.com/engineering/code-execution-with-mcp) for efficient AI agent interactions.
+
+A Model Context Protocol (MCP) server that converts text to zalgo format by adding combining diacritical marks. This server is designed exclusively for code execution mode, providing a self-documenting TypeScript wrapper instead of traditional tool listings.
 
 ## What is Zalgo Text?
 
 Z͠a̺̫͝l͊g͠o̼̰͞ t̲̗e̛x͓t̥͌̀ i͎̞ͅș͠ t̳̩̱ͅe̷͇x̙t̘͇͘ t̷͖̅ͅh̦͋̔͢a͂͛t̢ h̒a̧s̹͟͏ b̕eͣ̀͡͝e̷̹̘̔ǹ̡̚ m̀̏͑ò̩̎d̔̋i͢͡f͖͈̱i̺̻̪̕e̴d̈́͡ w̧̮͌i͝t̠h̷͇͆̿ c̤̰̹̈o͙̹ͨ͠m̠̀b͉͗͋i̡̪̋ͥn͔̠i͚n̹g̃͑͐͋ U͇̮͈͢ǹ̀ͥi̟ͥ̀c͉͜ȏ̵̞̬d͘e̲ͪ̀̐ c̜̥̔͘hͧa̬̟͏r̜ͅá͘c̖͜҉̀t̕e̥͙͟r͔͞s̫,̷̲̘ c̩̙r̜ȩ͓̄a͡ṱ̴̛͢i͚ͬ̌n̵̋͜ǵ a͓̓̀͘ d̸̘͟i̺̞̼ͦs̩t͈͋̌o̧̪̙͋r͢͞t̫̻͞ͅe͠d͖̤,̢̤̕ c͋͡r͚ͭͣ͢e̶̫ͩ͢ḙ̭̳͡p͉̿̄͠y̒ a̎p̟̏̅p̢eͯa̷̧ͯr̲͕a҉̶̩̹n͙̂́c̯̽e̅͟ ẃ͍̲i̢̢ṱhͣ̄͟͡ c͈͆͘h̴͉̭͢a̲͜r̪͡â̲ͪc̰̀̈t̝͐͒͘ë̴́̓rͧ͜ș̪̈ a͔p̵̒͘p̸͌̀ḙ̦á͚r̟i̔̓n͔̊g̅ t̶̂o̧͊ "̧̥̕b̜l̠͉͏̎ė̶͔͡ȅ͎̂́d́"ͨ̾ͫ a̴b̶̫̏͞o҉̯͢v̗͗̾e̵͏̎͘ a͚̫̎n̲͇͘d̴͈ b͎̳̄é̡̿̌lͣͤöw͏̵ͪ̌ ṯ͑҉̀h̀e̯͜͢ n͚͘͘͠ó͘r̾͑ͅm̱̪͏ä͢l͏̤͏ t͋҉̻̀eͥx̟ṱ̀ͦ̏ l̼ḯ̮̜ͅn̠̪̞̤ẹ.͔͂ͩ͟
+
+## Why Code Execution Only?
+
+This server demonstrates the [code execution pattern described by Anthropic](https://www.anthropic.com/engineering/code-execution-with-mcp), which provides significant efficiency benefits:
+
+- **Progressive Disclosure**: Load tool definitions on-demand, not all upfront
+- **Context Efficiency**: Intermediate results stay in the execution environment
+- **Better Composition**: Use familiar programming patterns (loops, conditionals, variables)
+- **Reduced Token Usage**: Especially beneficial with servers exposing many tools
+
+Traditional MCP servers load all tool definitions into the model's context window upfront. In code execution mode, agents discover tools by reading TypeScript wrapper code as needed, keeping context usage minimal.
 
 ## Installation
 
@@ -13,8 +26,6 @@ npm install
 ```
 
 ## Development
-
-This server is written in TypeScript. To build and run:
 
 ```bash
 # Install dependencies
@@ -30,157 +41,162 @@ npm start
 npm run dev
 ```
 
-## Usage
+## Usage with Code Execution
 
-This is an MCP server that communicates via stdio. It can be used with any MCP client.
+This server is designed for MCP clients that support code execution mode. Here's how agents interact with it:
 
-### Available Resources
+### 1. Discover the Wrapper
 
-The server provides example resources showing different intensity levels:
+Agents list resources and find the TypeScript wrapper:
 
-- `zalgo://examples/light` - Subtle zalgo effect with minimal marks
-- `zalgo://examples/medium` - Balanced zalgo effect with moderate marks  
-- `zalgo://examples/heavy` - Intense zalgo effect with maximum marks
-- `zalgo://code/wrapper` - TypeScript wrapper code for code execution mode
-
-Each example resource contains the same text rendered at different intensities, making it easy to preview the effects before applying them to your own text.
-
-### Available Prompts
-
-#### `zalgoify-text`
-
-A quick prompt to convert any text to zalgo format with medium intensity.
-
-**Arguments:**
-- `text` (required): The text to convert to zalgo format
-
-**Example Usage:**
-Simply use the prompt and provide the text you want to convert. The AI will automatically apply medium intensity zalgo effects.
-
-### Available Tools
-
-#### `zalgoify`
-
-Converts text to zalgo format with customizable options.
-
-**Parameters:**
-- `text` (required, string): The text to convert to zalgo format
-- `intensity` (optional, string): Intensity level - "light", "medium" (default), or "heavy"
-- `up` (optional, boolean): Add marks above characters (default: true)
-- `middle` (optional, boolean): Add marks through characters (default: true)
-- `down` (optional, boolean): Add marks below characters (default: true)
-
-**Example:**
-```json
-{
-  "text": "Hello World",
-  "intensity": "medium",
-  "up": true,
-  "middle": true,
-  "down": true
-}
+```typescript
+// Agent discovers: zalgo://code/wrapper
+const wrapper = await readResource('zalgo://code/wrapper');
+// Returns self-documenting TypeScript code with full type definitions
 ```
 
-## Code Execution Mode
+### 2. Import and Use
 
-This server supports the [code execution pattern](https://www.anthropic.com/engineering/code-execution-with-mcp) described by Anthropic for more efficient token usage in AI agents.
+The wrapper is self-documenting TypeScript that agents can directly import and use:
 
-### What is Code Execution Mode?
-
-Instead of loading all tool definitions into the model's context window and passing intermediate results through the model, agents can use code execution to interact with MCP servers more efficiently. This approach:
-
-1. **Reduces token consumption** - Tool definitions are loaded on-demand rather than all upfront
-2. **Improves efficiency** - Intermediate results stay in the execution environment
-3. **Enables composition** - Complex operations can be built using familiar programming patterns
-
-### How to Use Code Execution Mode
-
-MCP clients can generate TypeScript wrapper code that exposes this server's tools as importable functions. The server provides an example wrapper at `zalgo://code/wrapper`.
-
-**Traditional MCP approach (less efficient):**
 ```typescript
-// All tool definitions loaded into context upfront
-// Each tool call and result passes through the model
-
-TOOL CALL: zalgoify(text: "Hello", intensity: "light")
-→ returns zalgoified text through model context
-```
-
-**Code execution approach (more efficient):**
-```typescript
-// Agent discovers tools by exploring filesystem
-// Only loads definitions when needed
-// Results stay in execution environment
-
 import * as zalgo from './servers/mcp-zalgo';
 
-const text = "Hello World";
-const result = await zalgo.zalgoify({ text, intensity: 'heavy' });
-console.log(`Zalgoified: ${result.text}`);
+// Basic usage with default settings
+const result = await zalgo.zalgoify({ text: 'Hello World' });
+console.log(result.text);
+// Output: H̢̦̻̭è̵ͥl̗l̼̳̀ͨo̒͐ W҉̴ǫ̀r̚͢l̡̫̝̭d͏ͬ!͔̀̀
+
+// Custom intensity and position
+const heavy = await zalgo.zalgoify({ 
+  text: 'Spooky', 
+  intensity: 'heavy',
+  up: true,
+  down: true,
+  middle: false
+});
+console.log(heavy.text);
 ```
 
-### Token Efficiency Benefits
+### 3. Compose Operations
 
-For servers with many tools, the code execution pattern dramatically reduces token usage:
-
-- **Progressive Disclosure**: Load tool definitions on-demand by reading specific files
-- **Context Efficiency**: Filter and transform data in code before returning to the model
-- **Control Flow**: Use loops, conditionals, and error handling without chaining tool calls
-
-While this server has only one tool, it demonstrates the pattern for future expansion. As you add more tools, the efficiency gains become more significant.
-
-### Example Client Implementation
-
-MCP clients would generate a file structure like:
-
-```
-servers/
-└── mcp-zalgo/
-    ├── zalgoify.ts
-    └── index.ts
-```
-
-Where `zalgoify.ts` contains:
+Because this is real code, agents can use standard programming patterns:
 
 ```typescript
-import { callMCPTool } from "../../../client.js";
+import * as zalgo from './servers/mcp-zalgo';
 
-export interface ZalgoifyInput {
-  text: string;
-  intensity?: 'light' | 'medium' | 'heavy';
-  up?: boolean;
-  middle?: boolean;
-  down?: boolean;
+// Process multiple texts efficiently
+const texts = ['Hello', 'World', 'Code', 'Execution'];
+const results = [];
+
+for (const text of texts) {
+  const zalgoText = await zalgo.zalgoify({ text, intensity: 'light' });
+  results.push(zalgoText.text);
 }
 
-export async function zalgoify(input: ZalgoifyInput): Promise<{ text: string }> {
-  return callMCPTool('mcp-zalgo', 'zalgoify', input);
-}
+console.log(`Processed ${results.length} texts`);
+// Only this summary appears in context, not all intermediate results!
 ```
 
-Agents can then use familiar programming patterns to compose operations efficiently.
+## Available Functions
+
+### `zalgoify(input: ZalgoifyInput): Promise<ZalgoifyResponse>`
+
+Convert text to zalgo format with combining diacritical marks.
+
+**Parameters:**
+- `text` (required, string): The text to convert
+- `intensity` (optional): `'light'` | `'medium'` | `'heavy'` (default: `'medium'`)
+- `up` (optional, boolean): Add marks above characters (default: `true`)
+- `middle` (optional, boolean): Add marks through characters (default: `true`)
+- `down` (optional, boolean): Add marks below characters (default: `true`)
+
+**Returns:**
+```typescript
+{ text: string }  // The zalgoified text
+```
+
+## Technical Details
+
+### Architecture
+
+This server exposes a single MCP resource (`zalgo://code/wrapper`) containing TypeScript wrapper code. The wrapper provides:
+
+- **Type Definitions**: Full TypeScript interfaces for all functions
+- **JSDoc Comments**: Comprehensive documentation
+- **Usage Examples**: Real code examples in comments
+- **Self-Describing API**: Everything an agent needs in one file
+
+### How It Works
+
+```
+Agent writes code: await zalgo.zalgoify({ text: 'Hello' })
+         ↓
+Wrapper calls: callMCPTool('mcp-zalgo', 'zalgoify', {...})
+         ↓
+MCP Client: Sends CallToolRequest via MCP protocol
+         ↓
+This Server: Processes request, returns result
+         ↓
+Agent: Receives result as a variable in code
+```
+
+The server itself doesn't expose traditional tool listings. It only:
+1. **Lists** one resource (the TypeScript wrapper)
+2. **Provides** the wrapper code when requested
+3. **Executes** tool calls that come from the wrapper
+
+### Traditional vs Code Execution Mode
+
+**Traditional MCP (not supported by this server):**
+```
+❌ Load all tool definitions into context
+❌ Make individual tool calls through the model
+❌ Every result passes through context
+```
+
+**Code Execution Mode (this server):**
+```
+✅ Read wrapper code only when needed
+✅ Write code that calls tools
+✅ Results stay in execution environment
+✅ Compose operations with standard programming
+```
+
+## Server Configuration
+
+Add to your MCP client configuration:
+
+```json
+{
+  "mcpServers": {
+    "zalgo": {
+      "command": "node",
+      "args": ["/path/to/mcp-zalgo/dist/index.js"]
+    }
+  }
+}
+```
 
 ## Project Structure
 
 ```
 mcp-zalgo/
 ├── src/
-│   ├── index.ts          # Main MCP server implementation
-│   └── zalgoify.ts       # Core zalgo text generation logic
-├── dist/                 # Compiled JavaScript (generated)
+│   ├── index.ts              # MCP server (resources only, no tools/prompts)
+│   ├── zalgoify.ts           # Core zalgo generation logic
+│   └── wrapper-template.ts   # TypeScript wrapper exposed as resource
+├── dist/                     # Compiled JavaScript
 ├── package.json
 ├── tsconfig.json
 └── README.md
 ```
 
-## Development
+## Learn More
 
-The server is built with TypeScript and uses the official MCP SDK:
-
-- **Language**: TypeScript 5.3+
-- **Runtime**: Node.js with ES modules
-- **SDK**: `@modelcontextprotocol/sdk`
-- **Build**: Standard TypeScript compiler (tsc)
+- [Code Execution with MCP (Anthropic)](https://www.anthropic.com/engineering/code-execution-with-mcp) - The article that inspired this implementation
+- [Model Context Protocol](https://modelcontextprotocol.io/) - Official MCP documentation
+- [MCP Specification](https://spec.modelcontextprotocol.io/) - Technical specification
 
 ## License
 

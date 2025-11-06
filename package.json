@@ -2,7 +2,7 @@
   "name": "mcp-zalgo",
   "private": true,
   "version": "1.0.0",
-  "description": "MCP server that converts text to zalgo format",
+  "description": "Code execution only MCP server demonstrating efficient AI agent interactions through TypeScript wrappers",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
@@ -11,7 +11,7 @@
     "dev": "tsx src/index.ts",
     "prepare": "npm run build"
   },
-  "keywords": ["mcp", "zalgo", "text"],
+  "keywords": ["mcp", "zalgo", "text", "code-execution", "typescript-wrapper", "model-context-protocol", "ai-agents"],
   "author": "",
   "license": "MIT",
   "dependencies": {
